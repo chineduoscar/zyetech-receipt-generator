@@ -16,7 +16,7 @@ export default function ReceiptSuccessView({
 
     // 2. Format and open the WhatsApp message link
     const message = encodeURIComponent(
-      `Hello ${studentName}, here is your payment receipt for your enrollment in ${course} at Zyetech Innovation Technology. I have attached the PDF receipt to this chat.`,
+      `Hello ${studentName}, here is your payment receipt for your enrollment in ${course} at Zyetech Innovation Technology.`,
     );
     window.open(`https://api.whatsapp.com/send?text=${message}`, "_blank");
   };
