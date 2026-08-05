@@ -12,6 +12,7 @@ const COURSES = [
   "Digital Marketing",
   "Cybersecurity",
   "UI/UX Design",
+  "kiddies Bootcamp",
   "Product Design",
   "Graphics Design",
   "Full Stack Development",
