@@ -50,7 +50,9 @@ export default function ReceiptGenerator() {
   const [course, setCourse] = useState(COURSES[0]);
   const [paymentMethod, setPaymentMethod] = useState("Bank Transfer");
   const [totalCost, setTotalCost] = useState("");
-  const [amountPaid, setAmountPaid] = useState("");
+  const [amountPaid, setAmountPaid] = useState(""); // Current session payment
+  const [previousPaid, setPreviousPaid] = useState(""); // Total paid in past installments
+
   const [paymentPlan, setPaymentPlan] = useState("Full payment");
   const [installmentStructure, setInstallmentStructure] = useState("2-part");
   const [currentStage, setCurrentStage] = useState("1st");
@@ -61,8 +63,17 @@ export default function ReceiptGenerator() {
   const [receiptDate, setReceiptDate] = useState(getInitialDate);
 
   const numericTotal = Number(totalCost) || 0;
-  const numericPaid = Number(amountPaid) || 0;
-  const outstandingBalance = Math.max(0, numericTotal - numericPaid);
+  const numericCurrentPaid = Number(amountPaid) || 0;
+  const numericPrevPaid =
+    paymentPlan === "Installmental" && currentStage !== "1st"
+      ? Number(previousPaid) || 0
+      : 0;
+
+  // Total cumulative amount paid (previous + current session)
+  const totalCumulativePaid = numericPrevPaid + numericCurrentPaid;
+
+  // Accurate outstanding balance calculation based on total cumulative payments
+  const outstandingBalance = Math.max(0, numericTotal - totalCumulativePaid);
 
   const isFinalPayment =
     paymentPlan === "Full payment" ||
@@ -74,8 +85,11 @@ export default function ReceiptGenerator() {
     studentName,
     studentPhone,
     course,
-    totalCost,
-    amountPaid,
+    totalCost: numericTotal,
+    amountPaid: numericCurrentPaid,
+    previousPaid: numericPrevPaid,
+    totalPaid: totalCumulativePaid,
+    outstandingBalance,
     paymentMethod,
     paymentPlan,
     installmentStructure,
@@ -98,6 +112,8 @@ export default function ReceiptGenerator() {
     setIsSubmitted(false);
     setReceiptNumber(getRandomReceiptNumber());
     setReceiptDate(getInitialDate());
+    setPreviousPaid("");
+    setAmountPaid("");
   };
 
   return (
@@ -300,6 +316,21 @@ export default function ReceiptGenerator() {
                         </select>
                       </div>
                     </div>
+
+                    {currentStage !== "1st" && (
+                      <div>
+                        <label className="block text-[11px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                          Total Amount Already Paid Previously (₦)
+                        </label>
+                        <input
+                          type="number"
+                          value={previousPaid}
+                          onChange={(e) => setPreviousPaid(e.target.value)}
+                          placeholder="e.g. 40000"
+                          className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"
+                        />
+                      </div>
+                    )}
 
                     {!isFinalPayment && (
                       <div>

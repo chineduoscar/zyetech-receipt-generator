@@ -25,9 +25,11 @@ export const generatePDFReceipt = async (data) => {
     course,
     totalCost,
     amountPaid,
+    previousPaid,
+    totalPaid,
+    outstandingBalance,
     paymentMethod,
     paymentPlan,
-    installmentStructure,
     currentStage,
     settleByDate,
     receiptNumber,
@@ -72,7 +74,6 @@ export const generatePDFReceipt = async (data) => {
   );
   doc.text("Port -Harcourt, Rivers State.", marginX, y + 42);
 
-  // Using standard ASCII text for Call / Email to avoid encoding issues
   doc.setFontSize(8.5);
   doc.text(
     "Call: (+234) 9113263807     |     Email: zyetechofficial@gmail.com",
@@ -80,7 +81,7 @@ export const generatePDFReceipt = async (data) => {
     y + 58,
   );
 
-  y += 85; // Spacing so header metadata doesn't overlap with the TITLE text
+  y += 85;
 
   // --- TITLE ---
   doc.setFont("helvetica", "bold");
@@ -90,7 +91,7 @@ export const generatePDFReceipt = async (data) => {
 
   y += 20;
 
-  // --- META INFO (Optional Receipt Number) ---
+  // --- META INFO ---
   doc.setFontSize(9);
   doc.setTextColor(...gray);
 
@@ -136,27 +137,53 @@ export const generatePDFReceipt = async (data) => {
 
   // Right column details
   const numericTotal = Number(totalCost) || 0;
-  const numericPaid = Number(amountPaid) || 0;
-  const outstanding = Math.max(0, numericTotal - numericPaid);
+  const numericCurrentPaid = Number(amountPaid) || 0;
+  const numericPrevPaid = Number(previousPaid) || 0;
+  const cumulativePaid =
+    Number(totalPaid) || numericCurrentPaid + numericPrevPaid;
+  const outstanding =
+    Number(outstandingBalance) || Math.max(0, numericTotal - cumulativePaid);
 
+  let rightOffset = 0;
   doc.text(`Total Cost: NGN ${numericTotal.toLocaleString()}`, rightColX, y);
+  rightOffset += 16;
+
+  if (paymentPlan === "Installmental" && currentStage !== "1st") {
+    doc.text(
+      `Previous Paid: NGN ${numericPrevPaid.toLocaleString()}`,
+      rightColX,
+      y + rightOffset,
+    );
+    rightOffset += 16;
+  }
+
   doc.text(
-    `Amount Paid: NGN ${numericPaid.toLocaleString()}`,
+    `Amount Paid (Current): NGN ${numericCurrentPaid.toLocaleString()}`,
     rightColX,
-    y + 16,
+    y + rightOffset,
   );
-  doc.text(`Payment Method: ${paymentMethod}`, rightColX, y + 32);
+  rightOffset += 16;
+
+  doc.text(
+    `Total Cumulative Paid: NGN ${cumulativePaid.toLocaleString()}`,
+    rightColX,
+    y + rightOffset,
+  );
+  rightOffset += 16;
+
+  doc.text(`Payment Method: ${paymentMethod}`, rightColX, y + rightOffset);
+  rightOffset += 16;
 
   if (paymentPlan === "Installmental") {
     doc.text(
       `Outstanding Balance: NGN ${outstanding.toLocaleString()}`,
       rightColX,
-      y + 48,
+      y + rightOffset,
     );
-    y += 20;
+    rightOffset += 16;
   }
 
-  y += 50;
+  y += Math.max(50, rightOffset + 10);
 
   // --- TABLE HEADER ---
   const tableTop = y;
@@ -179,16 +206,20 @@ export const generatePDFReceipt = async (data) => {
   doc.setTextColor(...dark);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
-  doc.text(course, marginX + 10, rowTop + 22);
+  const rowDescription =
+    paymentPlan === "Installmental"
+      ? `${course} (${currentStage} Installment)`
+      : course;
+  doc.text(rowDescription, marginX + 10, rowTop + 22);
 
   doc.setFont("helvetica", "bold");
   doc.text(
-    `NGN ${numericPaid.toLocaleString()}`,
+    `NGN ${numericCurrentPaid.toLocaleString()}`,
     pageWidth - marginX - 85,
     rowTop + 22,
   );
 
-  y = rowTop + rowHeight + 50;
+  y = rowTop + rowHeight + 40;
 
   // --- TERMS & SIGNATURE SECTION ---
   const termsY = y;
