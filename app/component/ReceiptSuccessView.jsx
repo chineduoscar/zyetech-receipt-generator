@@ -10,21 +10,15 @@ export default function ReceiptSuccessView({
   course,
   receiptNumber,
 }) {
-  // Share via WhatsApp
   const handleWhatsAppShare = () => {
+    // 1. Download the PDF locally first
+    onDownload();
+
+    // 2. Format and open the WhatsApp message link
     const message = encodeURIComponent(
-      `Hello ${studentName}, here is your payment receipt (${receiptNumber}) for your enrollment in ${course} at Zyetech Innovation Technology.`,
+      `Hello ${studentName}, here is your payment receipt for your enrollment in ${course} at Zyetech Innovation Technology. I have attached the PDF receipt to this chat.`,
     );
     window.open(`https://api.whatsapp.com/send?text=${message}`, "_blank");
-  };
-
-  // Share via Gmail
-  const handleEmailShare = () => {
-    const subject = encodeURIComponent(`Payment Receipt - ${receiptNumber}`);
-    const body = encodeURIComponent(
-      `Dear ${studentName},\n\nAttached is your payment receipt for your course: ${course}.\n\nThank you for choosing Zyetech Innovation Technology.`,
-    );
-    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
   };
 
   return (
@@ -68,8 +62,8 @@ export default function ReceiptSuccessView({
           Your receipt has been created!
         </h2>
         <p className="text-sm text-slate-500">
-          You can download your document or share the details via WhatsApp and
-          Gmail.
+          Clicking WhatsApp will automatically download your PDF and open the
+          chat so you can attach it.
         </p>
       </div>
 
@@ -83,19 +77,12 @@ export default function ReceiptSuccessView({
           Download Receipt
         </button>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3">
           <button
             onClick={handleWhatsAppShare}
             className="w-full py-2.5 px-3 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors focus:outline-none cursor-pointer flex items-center justify-center space-x-2"
           >
-            <span>WhatsApp</span>
-          </button>
-
-          <button
-            onClick={handleEmailShare}
-            className="w-full py-2.5 px-3 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors focus:outline-none cursor-pointer flex items-center justify-center space-x-2"
-          >
-            <span>Gmail</span>
+            <span>Download & Share via WhatsApp</span>
           </button>
         </div>
 

@@ -19,6 +19,8 @@ const COURSES = [
   "Back End Development",
   "Generative AI for video animation",
   "Virtual Assistance",
+  "Video Editing",
+  "Content Creation",
 ];
 
 const generateReceiptId = customAlphabet(
@@ -85,8 +87,6 @@ export default function ReceiptGenerator() {
 
   const handleGenerateReceipt = (e) => {
     e.preventDefault();
-    const receiptData = getPayload();
-    generatePDFReceipt(receiptData);
 
     // Switch to success view
     setIsSubmitted(true);
@@ -100,7 +100,6 @@ export default function ReceiptGenerator() {
     setIsSubmitted(false);
     setReceiptNumber(getRandomReceiptNumber());
     setReceiptDate(getInitialDate());
-    // Optionally clear form or keep data based on your preference
   };
 
   return (
@@ -175,7 +174,7 @@ export default function ReceiptGenerator() {
                       type="text"
                       value={studentPhone}
                       onChange={(e) => setStudentPhone(e.target.value)}
-                      placeholder="e.g. +234 906 809 7269"
+                      placeholder="e.g. 09068097269"
                       className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#06066f]"
                     />
                   </div>
