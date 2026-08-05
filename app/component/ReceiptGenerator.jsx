@@ -51,13 +51,16 @@ export default function ReceiptGenerator() {
   const [course, setCourse] = useState(COURSES[0]);
   const [paymentMethod, setPaymentMethod] = useState("Bank Transfer");
   const [totalCost, setTotalCost] = useState("");
-  const [amountPaid, setAmountPaid] = useState(""); // Current session payment
-  const [previousPaid, setPreviousPaid] = useState(""); // Total paid in past installments
+  const [amountPaid, setAmountPaid] = useState("");
+  const [previousPaid, setPreviousPaid] = useState("");
 
   const [paymentPlan, setPaymentPlan] = useState("Full payment");
   const [installmentStructure, setInstallmentStructure] = useState("2-part");
   const [currentStage, setCurrentStage] = useState("1st");
   const [settleByDate, setSettleByDate] = useState("");
+
+  // --- ADDITIONAL NOTE STATE ---
+  const [note, setNote] = useState("");
 
   const [includeReceiptNumber, setIncludeReceiptNumber] = useState(true);
   const [receiptNumber, setReceiptNumber] = useState(getRandomReceiptNumber);
@@ -96,6 +99,7 @@ export default function ReceiptGenerator() {
     installmentStructure,
     currentStage,
     settleByDate,
+    note,
     receiptNumber: includeReceiptNumber ? receiptNumber : "",
     receiptDate,
   });
@@ -115,6 +119,7 @@ export default function ReceiptGenerator() {
     setReceiptDate(getInitialDate());
     setPreviousPaid("");
     setAmountPaid("");
+    setNote("");
   };
 
   return (
@@ -348,6 +353,20 @@ export default function ReceiptGenerator() {
                     )}
                   </div>
                 )}
+
+                {/* Additional Note Input */}
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                    Additional Notes (Optional)
+                  </label>
+                  <textarea
+                    rows="3"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Enter any additional details, waivers, or notes here..."
+                    className="w-full px-3 py-2 text-sm sm:text-base rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#06066f]"
+                  ></textarea>
+                </div>
 
                 <button
                   type="submit"

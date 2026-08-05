@@ -32,6 +32,7 @@ export const generatePDFReceipt = async (data) => {
     paymentPlan,
     currentStage,
     settleByDate,
+    note,
     receiptNumber,
     receiptDate,
   } = data;
@@ -219,13 +220,33 @@ export const generatePDFReceipt = async (data) => {
     rowTop + 22,
   );
 
-  y = rowTop + rowHeight + 40;
+  y = rowTop + rowHeight + 25;
+
+  // --- DYNAMIC NOTES SECTION (IF PROVIDED) ---
+  if (note && note.trim() !== "") {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...navy);
+    doc.text("Additional Notes:", marginX, y);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...dark);
+
+    // Split long text cleanly to fit content width
+    const splitNotes = doc.splitTextToSize(note.trim(), contentWidth);
+    doc.text(splitNotes, marginX, y + 14, { lineHeightFactor: 1.3 });
+
+    // Push the Y cursor down based on how many lines the note took up
+    y += 18 + splitNotes.length * 12;
+  }
 
   // --- TERMS & SIGNATURE SECTION ---
-  const termsY = y;
+  const termsY = y + 10;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
+  doc.setTextColor(...dark);
   doc.text("Payment Terms:", marginX, termsY);
 
   doc.setFont("helvetica", "normal");
@@ -284,12 +305,12 @@ export const generatePDFReceipt = async (data) => {
   doc.text("Signature", sigX, termsY + 87);
 
   // --- THANK YOU FOOTER ---
-  y = termsY + 110;
+  const footerY = Math.max(termsY + 110, termsY + 95);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.setTextColor(...dark);
-  doc.text("Thank You For", marginX, y);
-  doc.text("Your Payment!", marginX, y + 15);
+  doc.text("Thank You For", marginX, footerY);
+  doc.text("Your Payment!", marginX, footerY + 15);
 
   const saveFileName =
     receiptNumber && receiptNumber.trim() !== ""
