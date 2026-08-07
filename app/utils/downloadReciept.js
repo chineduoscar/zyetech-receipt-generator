@@ -291,8 +291,8 @@ export const generatePDFReceipt = async (data) => {
   doc.text("Emmanuel Majekodunmi", sigX, termsY + 16);
 
   try {
-    const sigBase64 = await loadImageAsBase64("/sign.jpg");
-    doc.addImage(sigBase64, "JPEG", sigX, termsY + 22, 130, 45);
+    const sigBase64 = await loadImageAsBase64("/sign.png");
+    doc.addImage(sigBase64, "PNG", sigX, termsY + 22, 130, 45);
   } catch (err) {
     console.error("Signature failed to load", err);
   }
