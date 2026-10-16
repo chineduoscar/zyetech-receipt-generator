@@ -1,7 +1,30 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
+
+const Spinner = () => (
+  <svg
+    className="animate-spin w-4 h-4"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+    />
+  </svg>
+);
 
 export default function ReceiptSuccessView({
   onReset,
@@ -10,15 +33,47 @@ export default function ReceiptSuccessView({
   course,
   receiptNumber,
 }) {
-  const handleWhatsAppShare = () => {
-    // 1. Download the PDF locally first
-    onDownload();
+  // Which action is running: null | "download" | "whatsapp"
+  const [busy, setBusy] = useState(null);
+  // Ref guard blocks a second click instantly, before React re-renders
+  const lockRef = useRef(false);
 
-    // 2. Format and open the WhatsApp message link
+  const isBusy = busy !== null;
+
+  // Runs an async task once, keeps the "Downloading..." state visible briefly
+  const runLocked = async (type, task) => {
+    if (lockRef.current) return;
+    lockRef.current = true;
+    setBusy(type);
+    try {
+      await Promise.all([
+        Promise.resolve(task()),
+        new Promise((r) => setTimeout(r, 800)), // minimum visible time
+      ]);
+    } catch (err) {
+      console.error("Download failed", err);
+    } finally {
+      lockRef.current = false;
+      setBusy(null);
+    }
+  };
+
+  const handleDownload = () => runLocked("download", onDownload);
+
+  const handleWhatsAppShare = () => {
     const message = encodeURIComponent(
       `Hello ${studentName}, here is your payment receipt for your enrollment in ${course} at Zyetech Innovation Technology.`,
     );
-    window.open(`https://api.whatsapp.com/send?text=${message}`, "_blank");
+    const url = `https://api.whatsapp.com/send?text=${message}`;
+
+    // Open the tab now (inside the click) so popup blockers allow it,
+    // then point it at WhatsApp once the PDF has downloaded.
+    const waWindow = window.open("", "_blank");
+
+    runLocked("whatsapp", onDownload).then(() => {
+      if (waWindow) waWindow.location.href = url;
+      else window.open(url, "_blank");
+    });
   };
 
   return (
@@ -70,25 +125,44 @@ export default function ReceiptSuccessView({
       {/* Action Buttons */}
       <div className="space-y-3 pt-2">
         <button
-          onClick={onDownload}
-          className="w-full py-3 px-4 text-white font-semibold rounded-lg shadow transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06066f] cursor-pointer"
+          onClick={handleDownload}
+          disabled={isBusy}
+          aria-busy={busy === "download"}
+          className="w-full py-3 px-4 text-white font-semibold rounded-lg shadow transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06066f] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           style={{ backgroundColor: "#06066f" }}
         >
-          Download Receipt
+          {busy === "download" ? (
+            <>
+              <Spinner />
+              <span>Downloading...</span>
+            </>
+          ) : (
+            <span>Download Receipt</span>
+          )}
         </button>
 
         <div className="grid gap-3">
           <button
             onClick={handleWhatsAppShare}
-            className="w-full py-2.5 px-3 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors focus:outline-none cursor-pointer flex items-center justify-center space-x-2"
+            disabled={isBusy}
+            aria-busy={busy === "whatsapp"}
+            className="w-full py-2.5 px-3 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors focus:outline-none cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <span>Download & Share via WhatsApp</span>
+            {busy === "whatsapp" ? (
+              <>
+                <Spinner />
+                <span>Downloading...</span>
+              </>
+            ) : (
+              <span>Download & Share via WhatsApp</span>
+            )}
           </button>
         </div>
 
         <button
           onClick={onReset}
-          className="w-full py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors cursor-pointer pt-2"
+          disabled={isBusy}
+          className="w-full py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors cursor-pointer pt-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           ← Create Another Receipt
         </button>
