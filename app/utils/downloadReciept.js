@@ -280,6 +280,25 @@ export const generatePDFReceipt = async (data) => {
     );
   }
 
+  // --- ADDED: EXTRA NOTE / POLICY NOTICE ---
+  const policyY =
+    termsY + (paymentPlan === "Installmental" && settleByDate ? 85 : 45);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...navy);
+  doc.text("NOTE:", marginX, policyY);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...dark);
+  doc.text(
+    "1. No Refund Policy: All payments made are non-refundable.\n2. No Course Change: Once the first class of a course has commenced,\n    students are not permitted to change to another course.\n\nThank you for choosing Zyetech!",
+    marginX,
+    policyY + 12,
+    { lineHeightFactor: 1.3 },
+  );
+
   // Right Side: Authorized By & Signature
   const sigX = pageWidth / 2 + 20;
   doc.setFont("helvetica", "bold");

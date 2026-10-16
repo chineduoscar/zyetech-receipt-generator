@@ -8,20 +8,24 @@ import ReceiptSuccessView from "../../app/component/ReceiptSuccessView";
 
 // --- COURSES DATA ARRAY ---
 const COURSES = [
-  "Data Analytics",
-  "Digital Marketing",
-  "Cybersecurity",
-  "UI/UX Design",
-  "kiddies Bootcamp",
-  "Product Design",
-  "Graphics Design",
-  "Full Stack Development",
-  "Front End Development",
+  "AI Automation",
   "Back End Development",
-  "Generative AI for video animation",
-  "Virtual Assistance",
-  "Video Editing",
   "Content Creation",
+  "Cybersecurity",
+  "Data Analysis with AI and Machine Learning",
+  "Data Analysis with Python",
+  "Data Analytics",
+  "Data Science",
+  "Digital Marketing",
+  "Front End Development",
+  "Full Stack Development",
+  "Generative AI for Video Animation",
+  "Graphics Design",
+  "Kiddies Bootcamp",
+  "Product Design",
+  "UI/UX Design",
+  "Video Editing",
+  "Virtual Assistance",
 ];
 
 const generateReceiptId = customAlphabet(
